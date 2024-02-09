@@ -1,17 +1,11 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
-
-class Database {
-    constructor() {
-        this.connect();
-    }
-
-    connect() {
-        mongoose
-            .connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-            .then(() => console.log('Connected to MongoDB'))
-            .catch((err) => console.error('Error connecting to MongoDB', err));
-    }
-}
-
-module.exports = new Database();
+// const mongoose = require('mongoose');
+// require('dotenv').config();
+//
+// module.exports = async () => {
+//     try {
+//         await mongoose.connect('mongodb+srv://shadyman:shadyman2005@cluster0.tmrr93o.mongodb.net/musicLab?retryWrites=true&w=majority', {});
+//         console.log("CONNECTED TO DATABASE SUCCESSFULLY");
+//     } catch (error) {
+//         console.error('COULD NOT CONNECT TO DATABASE:', error.message);
+//     }
+// };
