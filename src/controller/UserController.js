@@ -1,4 +1,5 @@
 const User = require('../model/User');
+const auth = require('../utils/Auth');
 
 class UserController {
     async createUser(req, res) {
