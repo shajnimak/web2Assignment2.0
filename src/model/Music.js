@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 const database = require('../utils/db');
 
-const musicSchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+
+const musicSchema = new Schema({
     title: String,
     author: String,
-    musicFile: {
-        data: Buffer,
-        contentType: String,
-    },
-    albumId: { type: mongoose.Schema.Types.ObjectId, ref: 'Album' },
+    albumId: { type: Schema.Types.ObjectId, ref: 'Album' },
+    filename: String, // Name of the file in GridFS
+    fileId: Schema.Types.ObjectId, // ID of the file in GridFS (optional)
 });
 
 const Music = mongoose.model('Music', musicSchema);
