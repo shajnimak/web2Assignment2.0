@@ -5,6 +5,12 @@ class UserController {
     async createUser(req, res) {
         try {
             const { username, password, isAdmin } = req.body;
+            //
+            const existingUser = await User.findOne({ username });
+            if (existingUser) {
+                return res.status(400).json({ error: 'Username already exists' });
+            }
+            //
             const user = await User.create({ username, password, isAdmin });
             res.status(201).json(user);
         } catch (error) {
