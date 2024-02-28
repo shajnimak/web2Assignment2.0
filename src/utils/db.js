@@ -1,11 +1,21 @@
-// const mongoose = require('mongoose');
-// require('dotenv').config();
-//
-// module.exports = async () => {
-//     try {
-//         await mongoose.connect('mongodb+srv://shadyman:shadyman2005@cluster0.tmrr93o.mongodb.net/musicLab?retryWrites=true&w=majority', {});
-//         console.log("CONNECTED TO DATABASE SUCCESSFULLY");
-//     } catch (error) {
-//         console.error('COULD NOT CONNECT TO DATABASE:', error.message);
-//     }
-// };
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+let database = null;
+
+async function connectToDatabase() {
+    if (database) {
+        console.log("Database connection already established.");
+        return;
+    }
+    try {
+        await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log("Connected to database successfully.");
+        database = mongoose.connection;
+    } catch (error) {
+        console.error("Could not connect to database:", error);
+        throw error;
+    }
+}
+
+module.exports = connectToDatabase;
