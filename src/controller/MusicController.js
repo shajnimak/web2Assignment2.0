@@ -13,7 +13,6 @@ class MusicController {
                 author,
                 albumId,
                 filename: req.file.filename, // Filename stored in GridFS
-                fileId: req.file.id // Optional: Store the file ID if needed
             });
             res.status(201).json(music);
         } catch (error) {

@@ -8,7 +8,6 @@ const musicSchema = new Schema({
     author: String,
     albumId: { type: Schema.Types.ObjectId, ref: 'Album' },
     filename: String, // Name of the file in GridFS
-    fileId: Schema.Types.ObjectId, // ID of the file in GridFS (optional)
 });
 
 const Music = mongoose.model('Music', musicSchema);
