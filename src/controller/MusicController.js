@@ -7,7 +7,7 @@ class MusicController {
                 return res.status(400).json({ error: 'No file uploaded' });
             }
             const { title, author, albumId } = req.body;
-            // Create a reference to the uploaded file in your music document
+            
             const music = await Music.create({
                 title,
                 author,
@@ -22,20 +22,31 @@ class MusicController {
     }
 
     async getFile(req, res) {
-        const filename = req.params.filename;
+        const filename = req.params.filename; // Get the filename from the request parameters
         if (!mongoose.connection.db) {
             return res.status(500).json({ error: 'Database connection not established' });
         }
+        
         const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
             bucketName: 'musicFiles'
         });
-    
+
         bucket.find({ filename: filename }).toArray((err, files) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error querying for file' });
+            }
             if (!files || files.length === 0) {
                 return res.status(404).json({ error: 'File not found' });
             }
-            res.set('Content-Type', files[0].contentType);
+            const file = files[0];
+
+            res.set('Content-Type', file.contentType);
+            res.set('Content-Disposition', 'attachment; filename="' + file.filename + '"');
+
             const downloadStream = bucket.openDownloadStreamByName(filename);
+            downloadStream.on('error', function(error) {
+                return res.status(500).json({ error: 'Error streaming file' });
+            });
             downloadStream.pipe(res);
         });
     }
