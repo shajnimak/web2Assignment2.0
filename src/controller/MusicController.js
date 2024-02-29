@@ -1,55 +1,76 @@
 const Music = require('../model/Music');
+const mongoose = require('mongoose');
+
 
 class MusicController {
     async createMusic(req, res) {
         try {
+            // Check if a file is uploaded
             if (!req.file) {
                 return res.status(400).json({ error: 'No file uploaded' });
             }
+    
+            // Extract title, author, and albumId from request body
             const { title, author, albumId } = req.body;
-            
+    
+            // Create a new music document using Mongoose
             const music = await Music.create({
                 title,
                 author,
                 albumId,
                 filename: req.file.filename, // Filename stored in GridFS
             });
+    
+            // Respond with the created music object
             res.status(201).json(music);
+        } catch (error) {
+            console.error(error);
+            // Handle any internal server errors
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    
+
+    async getFile(req, res) {
+        const filename = req.params.filename; // Get the filename from the request parameters
+    
+        try {
+            if (!mongoose.connection.db) {
+                return res.status(500).json({ error: 'Database connection not established' });
+            }
+    
+            const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+                bucketName: 'musicFiles'
+            });
+    
+            const downloadStream = bucket.openDownloadStreamByName(filename);
+            
+            // Set response headers
+            downloadStream.on('file', (fileInfo) => {
+                res.set('Content-Type', fileInfo.contentType);
+                res.set('Content-Disposition', 'attachment; filename="' + fileInfo.filename + '"');
+            });
+    
+            // Pipe the download stream to the response
+            downloadStream.pipe(res);
+    
+            // Handle stream errors
+            downloadStream.on('error', function(error) {
+                console.error(error);
+                return res.status(500).json({ error: 'Error streaming file' });
+            });
+    
+            // Optionally handle cleanup or other actions after streaming finishes
+            downloadStream.on('finish', function() {
+                // Optionally handle cleanup or other actions after streaming finishes
+            });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-
-    async getFile(req, res) {
-        const filename = req.params.filename; // Get the filename from the request parameters
-        if (!mongoose.connection.db) {
-            return res.status(500).json({ error: 'Database connection not established' });
-        }
-        
-        const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-            bucketName: 'musicFiles'
-        });
-
-        bucket.find({ filename: filename }).toArray((err, files) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error querying for file' });
-            }
-            if (!files || files.length === 0) {
-                return res.status(404).json({ error: 'File not found' });
-            }
-            const file = files[0];
-
-            res.set('Content-Type', file.contentType);
-            res.set('Content-Disposition', 'attachment; filename="' + file.filename + '"');
-
-            const downloadStream = bucket.openDownloadStreamByName(filename);
-            downloadStream.on('error', function(error) {
-                return res.status(500).json({ error: 'Error streaming file' });
-            });
-            downloadStream.pipe(res);
-        });
-    }
+    
+    
 
     async getMusicList(req, res) {
         try {
