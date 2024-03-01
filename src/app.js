@@ -30,3 +30,5 @@ connectToDatabase().then(() => {
     console.error('Failed to connect to database:', error);
     process.exit(1); // Exit the app if cannot connect to the database
 });
+
+module.exports = app;
