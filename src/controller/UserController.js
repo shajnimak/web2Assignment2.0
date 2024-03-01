@@ -87,7 +87,14 @@ class UserController {
             // Генерация JWT токена при успешной аутентификации
             const token = auth.generateToken(user);
 
-            res.status(200).json({ token });
+            // Включение дополнительных данных в ответ
+            const responseData = {
+                token,
+                userId: user._id,
+                username: user.username
+            };
+
+            res.status(200).json(responseData);
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Internal Server Error' });
